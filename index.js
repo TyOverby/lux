@@ -20,6 +20,12 @@ class Bbox {
     get width() {
         return this.maxX - this.minX;
     }
+    set width(w) {
+        this.maxX = this.minX + w;
+    }
+    set height(h) {
+        this.maxY= this.minY + h;
+    }
     get height() {
         return this.maxY - this.minY;
     }
@@ -298,17 +304,6 @@ function mouseMoveWhilstDown(target, whileMove) {
 }
 
 
-let xa = document.querySelector("#xa");
-xa.oninput = (event => {
-  lux.viewport = lux.viewport.translate(+event.target.value, 0);
-});
-
-let ya = document.querySelector("#ya");
-ya.oninput = (event => {
-  lux.viewport = lux.viewport.translate(0, +event.target.value);
-});
-
-
 mouseMoveWhilstDown(lux.canvas, function(dx, dy){
     let {xrat, yrat} = lux.rats();
     dx /= xrat;
@@ -327,8 +322,13 @@ function loop(){
 }
 loop();
 
-let btn = document.querySelector("#draw");
-btn.onclick = (_ => {
-    console.log("draw!");
-    stopped = true;
-});
+
+window.onresize = function () {
+    lux.width = window.innerWidth;
+    lux.height = window.innerHeight;
+    let vp = lux.viewport.clone();
+    vp.width = window.innerWidth / 5;
+    vp.height = window.innerHeight / 5;
+    lux.viewport = vp;
+}
+window.onresize();
