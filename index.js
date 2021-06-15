@@ -225,8 +225,8 @@ function draw_text(lux, text, x, y) {
     return [ new Bbox(x, y, x + w, y + h), {text, x, y}];
 }
 
-for (let i = 0; i < 10000; i++) {
-    for (let k = 0; k < 1000; k++) {
+for (let i = 0; i < 100; i++) {
+    for (let k = 0; k < 100; k++) {
         lux.add(...draw_text(lux, "hello", 30 * k, 20 * i));
         lux.add(...draw_text(lux, "world", 30 * k, 20 * i + 10));
     }
