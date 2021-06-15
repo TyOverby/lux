@@ -249,49 +249,52 @@ function draw_text(lux, text, x, y) {
 
 var items = [];
 
-for (let i = 0; i < 1000; i++) {
-    for (let k = 0; k < 1000; k++) {
+for (let i = 0; i < 100; i++) {
+    for (let k = 0; k < 100; k++) {
         items.push(draw_text(lux, "hello", 30 * k, 20 * i));
         items.push(draw_text(lux, "world", 30 * k, 20 * i + 10));
     }
 }
+
 lux.scene.addBulk(items);
 
-//lux.draw();
-
-//lux.ctx.scale(3,3);
-//lux.ctx.fillText("" + devicePixelRatio, 50,50);
-
 function mouseMoveWhilstDown(target, whileMove) {
-    let startX = 0;
-    let startY = 0;
+    function makeWhilst(down, move, up, getx, gety) {
+        let startX = 0;
+        let startY = 0;
 
-    var moving = function (event) {
-        let dx = event.screenX - startX;
-        let dy = event.screenY - startY;
-        startX = event.screenX;
-        startY = event.screenY;
-        whileMove(dx, dy);
+        var moving = function (event) {
+            console.log(event);
+            let newx = getx(event);
+            let newy = gety(event);
+            let dx = newx - startX;
+            let dy = newy - startY;
+            startX = newx
+            startY = newy
+            whileMove(dx, dy);
+        }
+
+        var endMove = function () {
+            window.removeEventListener(move, moving);
+            window.removeEventListener(up, endMove);
+            document.body.style["user-select"] = "auto";
+        };
+
+        target.oncontextmenu = function () {
+            return false;
+        }
+        target.addEventListener(down, function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            startX = getx(event);
+            startY = gety(event);
+            document.body.style["user-select"] = "none";
+            window.addEventListener(move, moving);
+            window.addEventListener(up, endMove);   
+        });
     }
-
-    var endMove = function () {
-        window.removeEventListener('mousemove', moving);
-        window.removeEventListener('mouseup', endMove);
-        document.body.style["user-select"] = "auto";
-    };
-
-    target.oncontextmenu = function () {
-        return false;
-    }
-    target.addEventListener('mousedown', function (event) {
-        event.stopPropagation();
-        event.preventDefault();
-        startX = event.screenX;
-        startY = event.screenY;
-        document.body.style["user-select"] = "none";
-        window.addEventListener('mousemove', moving);
-        window.addEventListener('mouseup', endMove);   
-    });
+    makeWhilst('mousedown', 'mousemove', 'mouseup', event => event.screenX, event => event.screenY);
+    makeWhilst('touchstart', 'touchmove', 'touchend', event=> event.changedTouches[0].screenX, event => event.changedTouches[0].screenY);
 }
 
 
