@@ -1,39 +1,68 @@
 class Bbox {
-    constructor(x1, y1, x2, y2){
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
+    constructor(minX, minY, maxX, maxY){
+        this.minX = minX;
+        this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
+    }
+
+    clone() {
+        return new Bbox(this.minX, this.minY, this.maxX, this.maxY);
     }
 
     eq(other) {
-        this.x1 == other.x1 && 
-        this.y1 == other.y1 && 
-        this.x2 == other.x2 && 
-        this.x2 == other.x2
+        this.minX == other.minX && 
+        this.minY == other.minY && 
+        this.maxX == other.maxX && 
+        this.maxX == other.maxX
     }
 
     get width() {
-        return this.x2 - this.x1;
+        return this.maxX - this.minX;
     }
     get height() {
-        return this.y2 - this.y1;
+        return this.maxY - this.minY;
     }
 
    intersects(other) {
-      return !(
-           other.x1 > this.x2
-        || other.x2 < this.x1
-        || other.y2 > this.y1
-        || other.y1 < this.y2)
+        var a = other.minX > this.maxX;
+        var b = other.maxX < this.minX;
+        var c = other.minY > this.maxY;
+        var d = other.maxY < this.minY;
+
+        return ! (a || b || c || d);
     }
 
     translate(dx, dy) {
-        return new Bbox(this.x1 + dx, this.y1+dy, this.x2 + dx, this.y2+dy)
+        return new Bbox(this.minX + dx, this.minY+dy, this.maxX + dx, this.maxY+dy)
     }
 }
 
 class Scene {
+    constructor () {
+        this.tree = new RBush();
+    }
+
+    add(bbox, ele) {
+       let x = bbox.clone();
+       x.value = ele;
+       this.tree.insert(x);
+    }
+
+    remove(bbox, ele) {
+        this.tree.remove(bbox, function(a){ a === ele});
+    }
+
+    intersecting(bbox) {
+        return this.tree.search(bbox);
+    }
+
+    all() {
+        return this.tree.all().map(function (a){ return [a, a.value];});
+    }
+}
+
+class _Scene {
     constructor () {
         this.elements = []
     }
@@ -130,29 +159,52 @@ class Lux {
         this._dirty_boxes.push(bbox);
     }
 
+    clear() {
+        this.ctx.clearRect(0,0, this._width *  window.devicePixelRatio, this._height * window.devicePixelRatio);
+        this._totally_dirty = true;
+    }
+
+    rats() {
+        let xrat = this._width / this.viewport.width;
+        let yrat = this._height / this.viewport.height;
+        return {xrat, yrat}
+    }
+
     apply_transform() {
         this.ctx.resetTransform();
-        
         let xrat = this._width / this.viewport.width;
         let yrat = this._height / this.viewport.height;
 
         this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-        this.ctx.translate(-this._viewport.x1, -this._viewport.y1);
         this.ctx.scale(xrat, yrat);
+        this.ctx.translate(-this._viewport.minX, -this._viewport.minY);
 
         // high-dpi
     }
 
     draw() {
         this.apply_transform();
-        for (let [bbox, o] of this.scene.all()) {
-            this.ctx.textBaseline='top';
+        this.ctx.textBaseline='top';
+        var drew = 0;
+        var omitted = 0;
+
+        var a = this.scene.intersecting(this._viewport);
+        var l = a.length;
+
+        for (var i = 0; i < l; i ++) {
+            let bbox = a[i]
+            let o = bbox.value;
+
             this.ctx.beginPath();
-            this.ctx.rect(bbox.x1,bbox.y1, bbox.x2-bbox.x1, bbox.y2-bbox.y1);
+            this.ctx.rect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
             this.ctx.strokeStyle="red";
+            this.ctx.lineWidth=0.1;
             this.ctx.stroke();
             this._renderer(o);
+                drew++;
         }
+        //console.log({drew, omitted});
+        this.ctx.resetTransform();
     }
 }
 
@@ -163,22 +215,27 @@ function renderer({text, x, y}) {
 
 let lux = new Lux(document.querySelector("#canvas"), renderer);
 lux.width = 500;
-lux.height = 100;
+lux.height = 500;
 lux.viewport = new Bbox(0, 0, 100, 100);
 
 function draw_text(lux, text, x, y) {
     let measured = lux.ctx.measureText(text);
     let w = measured.width;
-    let h = measured.actualBoundingBoxAscent + measured.actualBoundingBoxDescent;
+    let h = measured.actualBoundingBoxAscent + measured.actualBoundingBoxDescent + 1;
     return [ new Bbox(x, y, x + w, y + h), {text, x, y}];
 }
 
-lux.add(...draw_text(lux, "hello", 10, 10));
+for (let i = 0; i < 10000; i++) {
+    for (let k = 0; k < 1000; k++) {
+        lux.add(...draw_text(lux, "hello", 30 * k, 20 * i));
+        lux.add(...draw_text(lux, "world", 30 * k, 20 * i + 10));
+    }
+}
 
-lux.draw();
+//lux.draw();
 
 //lux.ctx.scale(3,3);
-lux.ctx.fillText("" + devicePixelRatio, 50,50);
+//lux.ctx.fillText("" + devicePixelRatio, 50,50);
 
 function mouseMoveWhilstDown(target, whileMove) {
     let startX = 0;
@@ -198,11 +255,15 @@ function mouseMoveWhilstDown(target, whileMove) {
         document.body.style["user-select"] = "auto";
     };
 
+    target.oncontextmenu = function () {
+        return false;
+    }
     target.addEventListener('mousedown', function (event) {
+        event.stopPropagation();
+        event.preventDefault();
         startX = event.screenX;
         startY = event.screenY;
         document.body.style["user-select"] = "none";
-        event.stopPropagation();
         window.addEventListener('mousemove', moving);
         window.addEventListener('mouseup', endMove);   
     });
@@ -219,19 +280,27 @@ ya.oninput = (event => {
   lux.viewport = lux.viewport.translate(0, +event.target.value);
 });
 
-let btn = document.querySelector("#draw");
-btn.onclick = (_ => {
-    console.log("draw!");
-    lux.draw();
-});
 
 mouseMoveWhilstDown(lux.canvas, function(dx, dy){
+    let {xrat, yrat} = lux.rats();
+    dx /= xrat;
+    dy /= yrat;
+
     lux.viewport = lux.viewport.translate(-dx, -dy);
 });
 
+var stopped = false;
 function loop(){
-    lux.ctx.clearRect(0, 0, lux._width, lux._height);
+    lux.clear();
     lux.draw();
-    requestAnimationFrame(loop);
+    if (!stopped) {
+        requestAnimationFrame(loop);
+    }
 }
 loop();
+
+let btn = document.querySelector("#draw");
+btn.onclick = (_ => {
+    console.log("draw!");
+    stopped = true;
+});
