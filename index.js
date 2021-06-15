@@ -49,6 +49,10 @@ class Scene {
        this.tree.insert(x);
     }
 
+    addBulk(items) {
+       this.tree.load(items);
+    }
+
     remove(bbox, ele) {
         this.tree.remove(bbox, function(a){ a === ele});
     }
@@ -149,6 +153,13 @@ class Lux {
         return this._viewport;
     }
 
+    addBulk(items) {
+        this.scene.addAll(items);
+        for (let item of items) {
+            this._dirty_boxes.push(item);
+        }
+    }
+
     add(bbox, ele) {
         this.scene.add(bbox, ele);
         this._dirty_boxes.push(bbox);
@@ -218,19 +229,33 @@ lux.width = 500;
 lux.height = 500;
 lux.viewport = new Bbox(0, 0, 100, 100);
 
+var text_cache = {};
 function draw_text(lux, text, x, y) {
-    let measured = lux.ctx.measureText(text);
+    let measured;
+    let found = (text_cache[text]);
+    if (found) {
+        measured=found;
+    } else {
+        measured = lux.ctx.measureText(text);
+        text_cache[text] = measured;
+    }
+
     let w = measured.width;
     let h = measured.actualBoundingBoxAscent + measured.actualBoundingBoxDescent + 1;
-    return [ new Bbox(x, y, x + w, y + h), {text, x, y}];
+    let box = new Bbox(x, y, x + w, y + h); 
+    box.value = {text, x, y}; 
+    return box
 }
 
-for (let i = 0; i < 100; i++) {
-    for (let k = 0; k < 100; k++) {
-        lux.add(...draw_text(lux, "hello", 30 * k, 20 * i));
-        lux.add(...draw_text(lux, "world", 30 * k, 20 * i + 10));
+var items = [];
+
+for (let i = 0; i < 1000; i++) {
+    for (let k = 0; k < 1000; k++) {
+        items.push(draw_text(lux, "hello", 30 * k, 20 * i));
+        items.push(draw_text(lux, "world", 30 * k, 20 * i + 10));
     }
 }
+lux.scene.addBulk(items);
 
 //lux.draw();
 
