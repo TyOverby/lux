@@ -270,7 +270,6 @@ function mouseMoveWhilstDown(target, whileMove) {
         let startY = 0;
 
         var moving = function (event) {
-            console.log(event);
             let newx = getx(event);
             let newy = gety(event);
             let dx = newx - startX;
@@ -321,6 +320,28 @@ function loop(){
     }
 }
 loop();
+
+lux.canvas.addEventListener('wheel', function (event) {
+    event.preventDefault();
+    let scale = event.deltaY / 200;
+    if (scale < 0) {
+        scale = 0.9;
+    } else {
+        scale = 1 / 0.9;
+    }
+    let new_width = lux.viewport.width * scale; 
+    let new_height = lux.viewport.width * scale; 
+    let delta_w = lux.viewport.width - new_width;
+    let delta_h = lux.viewport.height - new_height;
+    let new_x = lux.viewport.minX + delta_w / 2;
+    let new_y = lux.viewport.minY + delta_h / 2;
+
+    lux.viewport.minX = new_x;
+    lux.viewport.minY = new_y;
+    lux.viewport.width = new_width;
+    lux.viewport.height = new_height;
+    console.log(scale);
+});
 
 
 window.onresize = function () {
