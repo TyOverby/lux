@@ -5,25 +5,19 @@ export default class Scene {
         this.tree = new RBush();
     }
 
-    add(bbox, ele) {
-       let x = bbox.clone();
-       x.value = ele;
-       this.tree.insert(x);
+    add(element) {
+       this.tree.insert(element);
     }
 
     addBulk(items) {
        this.tree.load(items);
     }
 
-    remove(bbox, ele) {
-        this.tree.remove(bbox, function(a){ a === ele});
+    remove(element) {
+        this.tree.remove(element);
     }
 
     intersecting(bbox) {
         return this.tree.search(bbox);
-    }
-
-    all() {
-        return this.tree.all().map(function (a){ return [a, a.value];});
     }
 }

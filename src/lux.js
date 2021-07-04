@@ -14,13 +14,18 @@ export default class Lux {
         this._viewport = new Bbox(0, 0, 100, 100);
         this._totally_dirty = false;
         this._dirty_boxes = [];
+        this.ctx.textBaseline = 'bottom';
 
         this.set_size(this._width, this._height);
     }
 
+    mark_totally_dirty () {
+        this._dirty_boxes.push(this._viewport);
+    }
+
     set renderer(f) {
         this._renderer = f;
-        this._totally_dirty = true;
+        this.mark_totally_dirty();
     }
 
     set_size(width, height) {
@@ -29,7 +34,7 @@ export default class Lux {
         this._width = width;
         this._height = height;
 
-        this._totally_dirty = true;
+        this.mark_totally_dirty();
         this.canvas.style.width = width + "px";
         this.canvas.style.height = height + "px";
 
@@ -56,7 +61,6 @@ export default class Lux {
             this._prev_viewport = this._viewport;            
         }
 
-        this._totally_dirty = true;
         this._viewport = next;
     }
 
@@ -76,14 +80,11 @@ export default class Lux {
         this._dirty_boxes.push(bbox);
     }
 
-    remove(bbox, ele) {
-        this.scene.remove(bbox, ele);
-        this._dirty_boxes.push(bbox);
-    }
-
-    clear() {
-        this.ctx.clearRect(0,0, this._width *  window.devicePixelRatio, this._height * window.devicePixelRatio);
-        this._totally_dirty = true;
+    remove(bbox) {
+        this.scene.remove(bbox);
+        if(this._viewport.intersects(bbox)) {
+            this._dirty_boxes.push(bbox);
+        }
     }
 
     rats() {
@@ -100,61 +101,77 @@ export default class Lux {
         this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         this.ctx.scale(xrat, yrat);
         this.ctx.translate(-this._viewport.minX, -this._viewport.minY);
-
-        // high-dpi
     }
 
-    draw() {
-        console.log(this._totally_dirty);
-        if(!this._totally_dirty) {
+    draw_translated() {
+        if (this._prev_viewport.eq(this._viewport)) {
+            return;
+        }
+        let dw = this._prev_viewport.width - this._viewport.width; 
+        let dh = this._prev_viewport.height - this._viewport.height;
+        if(Math.abs(dw) > 0.0001 || Math.abs(dh) > 0.0001) {
+            this.mark_totally_dirty();
             return;
         }
 
-        if (!this._prev_viewport.eq(this._viewport)) {
-            if(Math.abs(this._prev_viewport.width - this._viewport.width) < 0.0001 && Math.abs(this._prev_viewport.height - this._viewport.height) < 0.001) {
-                let dx = this._viewport.minX - this._prev_viewport.minX;
-                let dy = this._viewport.minY - this._prev_viewport.minY;
+        let dx = this._viewport.minX - this._prev_viewport.minX;
+        let dy = this._viewport.minY - this._prev_viewport.minY;
 
-                let {xrat, yrat} = this.rats();
-                dx *= xrat;
-                dy *= yrat;
-
-                this.ctx.globalCompositeOperation = "copy";
-                this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
-                console.log("translating");
-
-                this._prev_viewport = this.viewport;
-                this._totally_dirty = false;
-                return;
-            } else {
-                let dx = this._viewport.width - this._prev_viewport.width;
-                let dy = this._viewport.height - this._prev_viewport.height;
-                console.log({dx, dy})
-            }
+        if (dx < 0) {
+            this._dirty_boxes.push(new Bbox(this._viewport.minX, this._viewport.minY, this._prev_viewport.minX, this._viewport.maxY));
+        } else if (dx > 0) {
+            this._dirty_boxes.push(new Bbox(this._prev_viewport.maxX, this._viewport.minY, this._viewport.maxX, this._viewport.maxY));
         }
 
-        this.ctx.clearRect(0,0, this._width *  window.devicePixelRatio, this._height * window.devicePixelRatio);
+        if (dy < 0) {
+            this._dirty_boxes.push(new Bbox(this._viewport.minX, this._viewport.minY, this._viewport.maxX, this._prev_viewport.minY));
+        } else if (dy > 0) {
+            this._dirty_boxes.push(new Bbox(this._viewport.minX, this._prev_viewport.maxY, this._viewport.maxX, this._viewport.maxY));
+        }
+
+        let {xrat, yrat} = this.rats();
+        dx *= xrat;
+        dy *= yrat;
+
+        let prev_composite = this.ctx.globalCompositeOperation;
+        this.ctx.globalCompositeOperation = "copy";
+        this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
+        this.ctx.globalCompositeOperation = prev_composite;
+    }
+
+    draw() {
+        //this.ctx.save();
+        this.draw_translated();
+        //this.mark_totally_dirty();
         this.apply_transform();
-        this.ctx.textBaseline='top';
+        this.ctx.textBaseline = 'top';
 
-        console.log("drawing");
-
-        var a = this.scene.intersecting(this._viewport);
-        var l = a.length;
-
-        for (var i = 0; i < l; i ++) {
-            let bbox = a[i]
-            let o = bbox.value;
-
+        for (var bbox of this._dirty_boxes) {
+            this.ctx.save();
             this.ctx.beginPath();
             this.ctx.rect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
-            this.ctx.strokeStyle="red";
-            this.ctx.lineWidth=0.1;
-            this.ctx.stroke();
-            this._renderer(o);
-        }
-        this.ctx.resetTransform();
+            this.ctx.clip();
+            this.ctx.clearRect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
+            var a = this.scene.intersecting(bbox);
+            var l = a.length;
 
+            for (var i = 0; i < l; i ++) {
+                let bbox = a[i]
+                /*
+                this.ctx.beginPath();
+                this.ctx.rect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
+                this.ctx.strokeStyle="red";
+                this.ctx.lineWidth=0.1;
+                this.ctx.stroke();
+                */
+                this._renderer(bbox);
+            }
+            this.ctx.restore();
+        }
+
+        //this.ctx.restore();
+        this._dirty_boxes = [] 
+        this.ctx.resetTransform();
         this._prev_viewport = this.viewport;
         this._totally_dirty = false;
     }

@@ -39,6 +39,14 @@ export default class Bbox {
         return ! (a || b || c || d);
     }
 
+    contains(b) {
+        var a = this;
+        return a.minX <= b.minX &&
+               a.minY <= b.minY &&
+               b.maxX <= a.maxX &&
+               b.maxY <= a.maxY;
+    }
+
     translate(dx, dy) {
         return new Bbox(this.minX + dx, this.minY+dy, this.maxX + dx, this.maxY+dy)
     }

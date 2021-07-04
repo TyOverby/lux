@@ -6,6 +6,7 @@ function renderer({text, x, y}) {
 }
 
 let lux = new Lux(document.querySelector("#canvas"), renderer);
+window.lux = lux;
 lux.width = 500;
 lux.height = 500;
 lux.viewport = new Bbox(0, 0, 100, 100);
@@ -24,20 +25,45 @@ function draw_text(lux, text, x, y) {
     let w = measured.width;
     let h = measured.actualBoundingBoxAscent + measured.actualBoundingBoxDescent + 1;
     let box = new Bbox(x, y, x + w, y + h); 
-    box.value = {text, x, y}; 
+    box.text = text;
+    box.x = x;
+    box.y = y;
     return box
 }
 
 var items = [];
 
+var to_add_and_remove = []
+
 for (let i = 0; i < 100; i++) {
     for (let k = 0; k < 100; k++) {
-        items.push(draw_text(lux, "hello", 30 * k, 20 * i));
-        items.push(draw_text(lux, "world", 30 * k, 20 * i + 10));
+        let hello = draw_text(lux, "hello", 30 * k, 20 * i);
+        let world = draw_text(lux, "world", 30 * k, 20 * i + 10);
+
+        if (i % 10 == 0) {
+            to_add_and_remove.push(hello);
+        }
+
+        lux.add(hello);
+        lux.add(world);
     }
 }
 
-lux.scene.addBulk(items);
+setInterval(function () {
+    for (var i of to_add_and_remove) {
+        lux.remove(i) 
+    }
+}, 1000);
+
+setTimeout (function () {
+    setInterval(function () {
+        for (var i of to_add_and_remove) {
+            lux.add(i) 
+        }
+    }, 1000);
+}, 500);
+
+//lux.scene.addBulk(items);
 
 function mouseMoveWhilstDown(target, whileMove) {
     function makeWhilst(down, move, up, getx, gety) {
