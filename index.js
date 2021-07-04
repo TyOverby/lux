@@ -71,10 +71,13 @@ function mouseMoveWhilstDown(target, whileMove) {
     function makeWhilst(down, move, up, getEvt) {
         let startX = 0;
         let startY = 0;
+        let loss_x = 0;
+        let loss_y = 0;
 
         var moving = function (event) {
             event = getEvt(event);
-            if (event.movementX && event.movementY) {
+            console.log({x : event.movementX, y : event.movementY });
+            if (event instanceof MouseEvent) {
                 let dx = event.movementX / devicePixelRatio;
                 let dy = event.movementY / devicePixelRatio;
                 whileMove(dx, dy);
@@ -99,7 +102,7 @@ function mouseMoveWhilstDown(target, whileMove) {
         }
         target.addEventListener(down, function (event) {
             if (event instanceof MouseEvent) {
-                console.log(lux.canvas.requestPointerLock());
+                //console.log(lux.canvas.requestPointerLock());
             }
             event.stopPropagation();
             event.preventDefault();
