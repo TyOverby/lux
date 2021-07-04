@@ -100,7 +100,7 @@ function mouseMoveWhilstDown(target, whileMove) {
             return false;
         }
         target.addEventListener(down, function (event) {
-            console.log(lux.canvas.requestPointerLock());
+            //console.log(lux.canvas.requestPointerLock());
             event.stopPropagation();
             event.preventDefault();
             startX = getEvt(event).screenX;
