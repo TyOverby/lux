@@ -1,10 +1,12 @@
-function knn(tree, x, y, n, predicate, maxDistance) {
+import TinyQueue from "./tinyqueue.js"
+
+export default function knn(tree, x, y, n, predicate, maxDistance) {
     var node = tree.data,
         result = [],
         toBBox = tree.toBBox,
         i, child, dist, candidate;
 
-    var queue = new Queue(undefined, compareDist);
+    var queue = new TinyQueue(undefined, compareDist);
 
     while (node) {
         for (i = 0; i < node.children.length; i++) {

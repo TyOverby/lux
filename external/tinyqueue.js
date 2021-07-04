@@ -1,4 +1,4 @@
-class TinyQueue {
+export default class TinyQueue {
     constructor(data = [], compare = defaultCompare) {
         this.data = data;
         this.length = this.data.length;

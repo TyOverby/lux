@@ -1,4 +1,6 @@
-class RBush {
+import quickselect from "./quickselect.js"
+
+export default class RBush {
     constructor(maxEntries = 9) {
         // max entries in a node is 9 by default; min node fill is 40% for best performance
         this._maxEntries = Math.max(4, maxEntries);
