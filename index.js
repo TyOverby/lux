@@ -1,5 +1,6 @@
 import Lux from "./src/lux.js"
 import Bbox from "./src/bbox.js"
+import current_sha from "./scripts/current_sha.js";
 
 function renderer({text, x, y}) {
     lux.ctx.fillText(text, x, y);
@@ -34,6 +35,8 @@ function draw_text(lux, text, x, y) {
 var items = [];
 
 var to_add_and_remove = []
+
+lux.add(draw_text(lux, current_sha, 0 , -30));
 
 for (let i = 0; i < 100; i++) {
     for (let k = 0; k < 100; k++) {
