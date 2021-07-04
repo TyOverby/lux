@@ -1,1 +1,1 @@
-export default "9b48452"
+export default "6992e50"
