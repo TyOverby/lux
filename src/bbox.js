@@ -11,10 +11,11 @@ export default class Bbox {
     }
 
     eq(other) {
-        this.minX == other.minX && 
-        this.minY == other.minY && 
-        this.maxX == other.maxX && 
-        this.maxX == other.maxX
+        return (
+            this.minX == other.minX && 
+            this.minY == other.minY && 
+            this.maxX == other.maxX && 
+            this.maxY == other.maxY)
     }
 
     get width() {

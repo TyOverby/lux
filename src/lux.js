@@ -10,7 +10,7 @@ export default class Lux {
         this._renderer = renderer;
         this._width = 100;
         this._height = 100;
-        this._prev_viewport = null;
+        this._prev_viewport = new Bbox(0,0,0,0);
         this._viewport = new Bbox(0, 0, 100, 100);
         this._totally_dirty = false;
         this._dirty_boxes = [];
@@ -106,15 +106,16 @@ export default class Lux {
     }
 
     draw_translated() {
-        if (this._prev_viewport.eq(this._viewport)) {
+        if (this._prev_viewport === this._viewport || this._prev_viewport.eq(this._viewport)) {
             return;
         }
         let dw = this._prev_viewport.width - this._viewport.width; 
         let dh = this._prev_viewport.height - this._viewport.height;
         if(Math.abs(dw) > 0.0001 || Math.abs(dh) > 0.0001) {
             this.mark_totally_dirty();
+            console.log("totally dirty!");
             return;
-        }
+        } 
 
         let dx = this._viewport.minX - this._prev_viewport.minX;
         let dy = this._viewport.minY - this._prev_viewport.minY;
@@ -138,7 +139,10 @@ export default class Lux {
         let prev_composite = this.ctx.globalCompositeOperation;
         this.ctx.globalCompositeOperation = "copy";
         //this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
-        this.ctx.drawImage(this.canvas, -Math.round(window.devicePixelRatio * dx), -Math.round(window.devicePixelRatio * dy));
+        let x = -Math.round(window.devicePixelRatio * dx);
+        let y = -Math.round(window.devicePixelRatio * dy);
+        this.ctx.drawImage(this.canvas, x, y);
+        console.log({x, y});
         this.ctx.globalCompositeOperation = prev_composite;
     }
 
@@ -146,6 +150,7 @@ export default class Lux {
         this.scene.flush();
         //this.ctx.save();
         this.draw_translated();
+        //this._dirty_boxes.push(this._viewport);
         //this.mark_totally_dirty();
         this.apply_transform();
         this.ctx.textBaseline = 'top';
@@ -165,45 +170,15 @@ export default class Lux {
             }
         }
         this.ctx.clip();
-            this.ctx.clearRect(this._viewport.minX,this._viewport.minY, this._viewport.maxX-this._viewport.minX, this._viewport.maxY-this._viewport.minY);
+        this.ctx.clearRect(this._viewport.minX,this._viewport.minY, this._viewport.maxX-this._viewport.minX, this._viewport.maxY-this._viewport.minY);
 
+        var drawn = 0;
         for (var o of to_draw) {
             this._renderer(o);
+            drawn ++;
         }
+
         this.ctx.restore();
-
-        // {
-        //     bbox = bbox.expand(1);
-        //     this.ctx.rect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
-        //     this.ctx.clip();
-        //     this.ctx.clearRect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
-
-        //     this.ctx.beginPath();
-        //     this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
-        //     let r = Math.floor(Math.random() * 255);
-        //     let g = Math.floor(Math.random() * 255);
-        //     let b = Math.floor(Math.random() * 255);
-        //     this.ctx.fillStyle=`rgba(${r},${g},${b}, 0.2)`;
-        //     this.ctx.fill();
-        //     this.ctx.closePath();
-        //     this.ctx.fillStyle="black";
-
-        //     var a = this.scene.intersecting(bbox);
-        //     var l = a.length;
-        //     for (var i = 0; i < l; i ++) {
-        //         let bbox = a[i]
-        //         this.ctx.beginPath();
-        //         this.ctx.rect(bbox.minX+1, bbox.minY+1, bbox.maxX-bbox.minX -2, bbox.maxY-bbox.minY -2 );
-        //         this.ctx.strokeStyle="red";
-        //         this.ctx.lineWidth=0.1;
-        //         this.ctx.stroke();
-        //         this._renderer(bbox);
-        //     }
-        //     this.ctx.restore();
-
-        // }
-
-        //this.ctx.restore();
         this._dirty_boxes = [] 
         this.ctx.resetTransform();
         this._prev_viewport = this.viewport;
