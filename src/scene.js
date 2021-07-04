@@ -6,9 +6,11 @@ export default class Scene {
         this.add_queue = []
     }
 
-    flush() {
-        this.tree.load(this.add_queue);
-        this.add_queue = [];
+    flush() { 
+        if (this.add_queue.length !== 0) {
+            this.tree.load(this.add_queue);
+            this.add_queue = [];
+        }
     }
 
     add(element) {
@@ -20,6 +22,7 @@ export default class Scene {
     }
 
     remove(element) {
+        this.flush();
         this.tree.remove(element);
     }
 
