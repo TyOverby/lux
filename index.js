@@ -75,12 +75,14 @@ function mouseMoveWhilstDown(target, whileMove) {
         let startY = 0;
 
         var moving = function (event) {
-            let newx = getx(event);
-            let newy = gety(event);
+            let dx = getx(event) / devicePixelRatio;
+            let dy = gety(event) / devicePixelRatio;
+            /*
             let dx = newx - startX;
             let dy = newy - startY;
             startX = newx
             startY = newy
+            */
             whileMove(dx, dy);
         }
 
@@ -88,12 +90,14 @@ function mouseMoveWhilstDown(target, whileMove) {
             window.removeEventListener(move, moving);
             window.removeEventListener(up, endMove);
             document.body.style["user-select"] = "auto";
+            document.exitPointerLock();
         };
 
         target.oncontextmenu = function () {
             return false;
         }
         target.addEventListener(down, function (event) {
+            console.log(lux.canvas.requestPointerLock());
             event.stopPropagation();
             event.preventDefault();
             startX = getx(event);
@@ -103,7 +107,9 @@ function mouseMoveWhilstDown(target, whileMove) {
             window.addEventListener(up, endMove);   
         });
     }
-    makeWhilst('mousedown', 'mousemove', 'mouseup', event => event.screenX, event => event.screenY);
+    makeWhilst('mousedown', 'mousemove', 'mouseup', 
+      event => event.movementX, 
+      event => event.movementY);
     makeWhilst('touchstart', 'touchmove', 'touchend', event=> event.changedTouches[0].screenX, event => event.changedTouches[0].screenY);
 }
 
