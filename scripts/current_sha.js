@@ -1,1 +1,1 @@
-export default "55d6758"
+export default "2c8e292"
