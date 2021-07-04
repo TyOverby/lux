@@ -76,7 +76,6 @@ function mouseMoveWhilstDown(target, whileMove) {
 
         var moving = function (event) {
             event = getEvt(event);
-            console.log({x : event.movementX, y : event.movementY });
             if (event instanceof MouseEvent) {
                 let dx = event.movementX / devicePixelRatio;
                 let dy = event.movementY / devicePixelRatio;

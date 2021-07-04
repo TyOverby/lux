@@ -150,40 +150,58 @@ export default class Lux {
         this.apply_transform();
         this.ctx.textBaseline = 'top';
 
+        var to_draw = new Set();
+
+        // Draw clip and collect draw attempts
+        this.ctx.save();
+        this.ctx.beginPath();
         for (var bbox of this._dirty_boxes) {
-            bbox = bbox.expand(1);
-
-            this.ctx.save();
-            this.ctx.beginPath();
             this.ctx.rect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
-            this.ctx.clip();
-            this.ctx.clearRect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
-
-            this.ctx.beginPath();
-            this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
-            let r = Math.floor(Math.random() * 255);
-            let g = Math.floor(Math.random() * 255);
-            let b = Math.floor(Math.random() * 255);
-            this.ctx.fillStyle=`rgba(${r},${g},${b}, 0.2)`;
-            this.ctx.fill();
-            this.ctx.closePath();
-            this.ctx.fillStyle="black";
 
             var a = this.scene.intersecting(bbox);
             var l = a.length;
-
             for (var i = 0; i < l; i ++) {
-                let bbox = a[i]
-                this.ctx.beginPath();
-                this.ctx.rect(bbox.minX+1, bbox.minY+1, bbox.maxX-bbox.minX -2, bbox.maxY-bbox.minY -2 );
-                this.ctx.strokeStyle="red";
-                this.ctx.lineWidth=0.1;
-                this.ctx.stroke();
-                this._renderer(bbox);
+                to_draw.add(a[i]);
             }
-            this.ctx.restore();
-
         }
+        this.ctx.clip();
+            this.ctx.clearRect(this._viewport.minX,this._viewport.minY, this._viewport.maxX-this._viewport.minX, this._viewport.maxY-this._viewport.minY);
+
+        for (var o of to_draw) {
+            this._renderer(o);
+        }
+        this.ctx.restore();
+
+        // {
+        //     bbox = bbox.expand(1);
+        //     this.ctx.rect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
+        //     this.ctx.clip();
+        //     this.ctx.clearRect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
+
+        //     this.ctx.beginPath();
+        //     this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
+        //     let r = Math.floor(Math.random() * 255);
+        //     let g = Math.floor(Math.random() * 255);
+        //     let b = Math.floor(Math.random() * 255);
+        //     this.ctx.fillStyle=`rgba(${r},${g},${b}, 0.2)`;
+        //     this.ctx.fill();
+        //     this.ctx.closePath();
+        //     this.ctx.fillStyle="black";
+
+        //     var a = this.scene.intersecting(bbox);
+        //     var l = a.length;
+        //     for (var i = 0; i < l; i ++) {
+        //         let bbox = a[i]
+        //         this.ctx.beginPath();
+        //         this.ctx.rect(bbox.minX+1, bbox.minY+1, bbox.maxX-bbox.minX -2, bbox.maxY-bbox.minY -2 );
+        //         this.ctx.strokeStyle="red";
+        //         this.ctx.lineWidth=0.1;
+        //         this.ctx.stroke();
+        //         this._renderer(bbox);
+        //     }
+        //     this.ctx.restore();
+
+        // }
 
         //this.ctx.restore();
         this._dirty_boxes = [] 
