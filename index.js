@@ -53,7 +53,7 @@ for (let i = 0; i < 100; i++) {
 }
 
 let added = true;
-
+/*
 setInterval(function () {
     for (var i of to_add_and_remove) {
         if (added) {
@@ -64,6 +64,7 @@ setInterval(function () {
     }
     added = !added;
 }, 1000);
+*/
 
 //lux.scene.addBulk(items);
 
