@@ -158,6 +158,16 @@ export default class Lux {
             this.ctx.rect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
             this.ctx.clip();
             this.ctx.clearRect(bbox.minX,bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
+
+            this.ctx.beginPath();
+            this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX-bbox.minX, bbox.maxY-bbox.minY);
+            let r = Math.floor(Math.random() * 255);
+            let g = Math.floor(Math.random() * 255);
+            let b = Math.floor(Math.random() * 255);
+            this.ctx.fillStyle=`rgba(${r},${g},${b}, 0.5)`;
+            this.ctx.fill();
+            this.ctx.closePath();
+
             var a = this.scene.intersecting(bbox);
             var l = a.length;
 
@@ -171,6 +181,7 @@ export default class Lux {
                 this._renderer(bbox);
             }
             this.ctx.restore();
+
         }
 
         //this.ctx.restore();
