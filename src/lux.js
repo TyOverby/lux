@@ -137,7 +137,8 @@ export default class Lux {
 
         let prev_composite = this.ctx.globalCompositeOperation;
         this.ctx.globalCompositeOperation = "copy";
-        this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
+        //this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
+        this.ctx.drawImage(this.canvas, -Math.round(window.devicePixelRatio * dx), -Math.round(window.devicePixelRatio * dy));
         this.ctx.globalCompositeOperation = prev_composite;
     }
 
