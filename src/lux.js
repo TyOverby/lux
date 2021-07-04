@@ -136,11 +136,18 @@ export default class Lux {
         dx *= xrat;
         dy *= yrat;
 
-        let prev_composite = this.ctx.globalCompositeOperation;
-        this.ctx.globalCompositeOperation = "copy";
-        //this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
         let x = -Math.round(window.devicePixelRatio * dx);
         let y = -Math.round(window.devicePixelRatio * dy);
+
+        /*
+        let imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.putImageData(imageData, x, y);
+        */
+
+        let prev_composite = this.ctx.globalCompositeOperation;
+        this.ctx.globalCompositeOperation = "copy";
+        this.ctx.imageSmoothingEnabled = false;
+        //this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
         this.ctx.drawImage(this.canvas, x, y);
         console.log({x, y});
         this.ctx.globalCompositeOperation = prev_composite;
@@ -149,9 +156,9 @@ export default class Lux {
     draw() {
         this.scene.flush();
         //this.ctx.save();
-        //this.draw_translated();
+        this.draw_translated();
         //this._dirty_boxes.push(this._viewport);
-        this.mark_totally_dirty();
+        //this.mark_totally_dirty();
         this.apply_transform();
         this.ctx.textBaseline = 'top';
 
