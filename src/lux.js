@@ -192,7 +192,8 @@ export default class Lux {
             this.ctx.rect (bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
         }
         this.ctx.closePath();
-        this.ctx.stroke();
+        this.ctx.fillStyle=`rgba(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255}, 0.5)`;
+        this.ctx.fill();
 
 
         this.ctx.restore();
