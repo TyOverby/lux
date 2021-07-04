@@ -70,20 +70,23 @@ setInterval(function () {
 //lux.scene.addBulk(items);
 
 function mouseMoveWhilstDown(target, whileMove) {
-    function makeWhilst(down, move, up, getx, gety) {
+    function makeWhilst(down, move, up, getEvt) {
         let startX = 0;
         let startY = 0;
 
         var moving = function (event) {
-            let dx = getx(event) / devicePixelRatio;
-            let dy = gety(event) / devicePixelRatio;
-            /*
-            let dx = newx - startX;
-            let dy = newy - startY;
-            startX = newx
-            startY = newy
-            */
-            whileMove(dx, dy);
+            event = getEvt(event);
+            if (event.movementX && event.movementY) {
+                let dx = event.movementX / devicePixelRatio;
+                let dy = event.movementY / devicePixelRatio;
+                whileMove(dx, dy);
+            } else {
+                let dx = event.screenX - startX;
+                let dy = event.screenY - startY;
+                startX = event.screenX;
+                startY = event.screenY;
+                whileMove(dx, dy);
+            }
         }
 
         var endMove = function () {
@@ -100,17 +103,15 @@ function mouseMoveWhilstDown(target, whileMove) {
             console.log(lux.canvas.requestPointerLock());
             event.stopPropagation();
             event.preventDefault();
-            startX = getx(event);
-            startY = gety(event);
+            startX = getEvt(event).screenX;
+            startY = getEvt(event).screenY;
             document.body.style["user-select"] = "none";
             window.addEventListener(move, moving);
             window.addEventListener(up, endMove);   
         });
     }
-    makeWhilst('mousedown', 'mousemove', 'mouseup', 
-      event => event.movementX, 
-      event => event.movementY);
-    makeWhilst('touchstart', 'touchmove', 'touchend', event=> event.changedTouches[0].screenX, event => event.changedTouches[0].screenY);
+    makeWhilst('mousedown', 'mousemove', 'mouseup', event => event);
+    makeWhilst('touchstart', 'touchmove', 'touchend', event => event.changedTouches[0]);
 }
 
 
