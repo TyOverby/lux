@@ -30,6 +30,10 @@ export default class Bbox {
         return this.maxY - this.minY;
     }
 
+   expand(by) {
+    return new Bbox(this.minX-by, this.minY-by, this.maxX + by, this.maxY + by);
+   }
+
    intersects(other) {
         var a = other.minX > this.maxX;
         var b = other.maxX < this.minX;
