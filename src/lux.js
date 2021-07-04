@@ -178,6 +178,11 @@ export default class Lux {
                 to_draw.add(a[i]);
             }
         }
+
+        this.ctx.fillStyle=`rgba(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255}, 0.2)`;
+        this.ctx.fill();
+        this.ctx.fillStyle="black";
+
         this.ctx.clip();
         //this.ctx.clearRect(this._viewport.minX,this._viewport.minY, this._viewport.maxX-this._viewport.minX, this._viewport.maxY-this._viewport.minY);
 
@@ -186,14 +191,13 @@ export default class Lux {
             this._renderer(o);
             drawn ++;
         }
-
+/*
         this.ctx.beginPath();
         for (var bbox of this._dirty_boxes) {
             this.ctx.rect (bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
         }
         this.ctx.closePath();
-        this.ctx.fillStyle=`rgba(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255}, 0.5)`;
-        this.ctx.fill();
+        */
 
 
         this.ctx.restore();
