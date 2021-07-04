@@ -149,9 +149,9 @@ export default class Lux {
     draw() {
         this.scene.flush();
         //this.ctx.save();
-        this.draw_translated();
+        //this.draw_translated();
         //this._dirty_boxes.push(this._viewport);
-        //this.mark_totally_dirty();
+        this.mark_totally_dirty();
         this.apply_transform();
         this.ctx.textBaseline = 'top';
 
