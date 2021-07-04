@@ -1,5 +1,7 @@
 import quickselect from "./quickselect.js"
 
+function compareMinX(a, b) { return a.minX - b.minX; }
+function compareMinY(a, b) { return a.minY - b.minY; }
 export default class RBush {
     constructor(maxEntries = 9) {
         // max entries in a node is 9 by default; min node fill is 40% for best performance
@@ -157,8 +159,6 @@ export default class RBush {
 
     toBBox(item) { return item; }
 
-    compareMinX(a, b) { return a.minX - b.minX; }
-    compareMinY(a, b) { return a.minY - b.minY; }
 
     toJSON() { return this.data; }
 
@@ -208,13 +208,13 @@ export default class RBush {
         const N2 = Math.ceil(N / M);
         const N1 = N2 * Math.ceil(Math.sqrt(M));
 
-        multiSelect(items, left, right, N1, this.compareMinX);
+        multiSelect(items, left, right, N1, compareMinX);
 
         for (let i = left; i <= right; i += N1) {
 
             const right2 = Math.min(i + N1 - 1, right);
 
-            multiSelect(items, i, right2, N2, this.compareMinY);
+            multiSelect(items, i, right2, N2, compareMinY);
 
             for (let j = i; j <= right2; j += N2) {
 
@@ -351,8 +351,8 @@ export default class RBush {
 
     // sorts node children by the best axis for split
     _chooseSplitAxis(node, m, M) {
-        const compareMinX = node.leaf ? this.compareMinX : compareNodeMinX;
-        const compareMinY = node.leaf ? this.compareMinY : compareNodeMinY;
+        const compareMinX = node.leaf ? compareMinX : compareNodeMinX;
+        const compareMinY = node.leaf ? compareMinY : compareNodeMinY;
         const xMargin = this._allDistMargin(node, m, M, compareMinX);
         const yMargin = this._allDistMargin(node, m, M, compareMinY);
 

@@ -38,7 +38,7 @@ var to_add_and_remove = []
 for (let i = 0; i < 100; i++) {
     for (let k = 0; k < 100; k++) {
         let hello = draw_text(lux, "hello", 30 * k, 20 * i);
-        let world = draw_text(lux, "world", 30 * k, 20 * i + 10);
+        let world = draw_text(lux, "world", 30 * k, 20 * i + 2);
 
         if (i % 10 == 0) {
             to_add_and_remove.push(hello);
@@ -49,19 +49,18 @@ for (let i = 0; i < 100; i++) {
     }
 }
 
+let added = true;
+
 setInterval(function () {
     for (var i of to_add_and_remove) {
-        lux.remove(i) 
-    }
-}, 1000);
-
-setTimeout (function () {
-    setInterval(function () {
-        for (var i of to_add_and_remove) {
+        if (added) {
+            lux.remove(i) 
+        } else {
             lux.add(i) 
         }
-    }, 1000);
-}, 500);
+    }
+    added = !added;
+}, 1000);
 
 //lux.scene.addBulk(items);
 

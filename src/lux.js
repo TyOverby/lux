@@ -75,9 +75,11 @@ export default class Lux {
         }
     }
 
-    add(bbox, ele) {
-        this.scene.add(bbox, ele);
-        this._dirty_boxes.push(bbox);
+    add(bbox) {
+        this.scene.add(bbox);
+        if(this._viewport.intersects(bbox)) {
+            this._dirty_boxes.push(bbox);
+        }
     }
 
     remove(bbox) {
@@ -140,6 +142,7 @@ export default class Lux {
     }
 
     draw() {
+        this.scene.flush();
         //this.ctx.save();
         this.draw_translated();
         //this.mark_totally_dirty();
