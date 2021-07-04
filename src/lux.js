@@ -164,9 +164,10 @@ export default class Lux {
             let r = Math.floor(Math.random() * 255);
             let g = Math.floor(Math.random() * 255);
             let b = Math.floor(Math.random() * 255);
-            this.ctx.fillStyle=`rgba(${r},${g},${b}, 0.5)`;
+            this.ctx.fillStyle=`rgba(${r},${g},${b}, 0.2)`;
             this.ctx.fill();
             this.ctx.closePath();
+            this.ctx.fillStyle="black";
 
             var a = this.scene.intersecting(bbox);
             var l = a.length;
