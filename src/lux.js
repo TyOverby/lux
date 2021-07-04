@@ -155,23 +155,28 @@ export default class Lux {
 
     draw() {
         this.scene.flush();
-        //this.ctx.save();
         this.draw_translated();
-        //this._dirty_boxes.push(this._viewport);
-        //this.mark_totally_dirty();
+
+        this.ctx.save();
         this.apply_transform();
         this.ctx.textBaseline = 'top';
 
-        var to_draw = new Set();
 
-        // Draw clip and collect draw attempts
-        this.ctx.save();
+        for (var bbox of this._dirty_boxes) {
+            bbox = bbox.expand(1);
+            this.ctx.clearRect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
+        }
+
         this.ctx.beginPath();
         for (var bbox of this._dirty_boxes) {
             bbox = bbox.expand(1);
-            this.ctx.rect     (bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
-            this.ctx.clearRect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
-
+            this.ctx.rect (bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
+        }
+        this.ctx.clip();
+        
+        var to_draw = new Set();
+        for (var bbox of this._dirty_boxes) {
+            bbox = bbox.expand(1);
             var a = this.scene.intersecting(bbox);
             var l = a.length;
             for (var i = 0; i < l; i ++) {
@@ -179,26 +184,13 @@ export default class Lux {
             }
         }
 
-        this.ctx.fillStyle=`rgba(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255}, 0.2)`;
-        this.ctx.fill();
-        this.ctx.fillStyle="black";
-
-        this.ctx.clip();
-        //this.ctx.clearRect(this._viewport.minX,this._viewport.minY, this._viewport.maxX-this._viewport.minX, this._viewport.maxY-this._viewport.minY);
-
         var drawn = 0;
+        this.ctx.save ();
         for (var o of to_draw) {
             this._renderer(o);
             drawn ++;
         }
-/*
-        this.ctx.beginPath();
-        for (var bbox of this._dirty_boxes) {
-            this.ctx.rect (bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
-        }
-        this.ctx.closePath();
-        */
-
+        this.ctx.restore();
 
         this.ctx.restore();
         this._dirty_boxes = [] 
