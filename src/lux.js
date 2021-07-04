@@ -149,7 +149,7 @@ export default class Lux {
         this.ctx.imageSmoothingEnabled = false;
         //this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
         this.ctx.drawImage(this.canvas, x, y);
-        console.log({x, y});
+        //console.log({x, y});
         this.ctx.globalCompositeOperation = prev_composite;
     }
 
