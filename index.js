@@ -37,6 +37,7 @@ var items = [];
 var to_add_and_remove = []
 
 lux.add(draw_text(lux, current_sha, 0 , -30));
+lux.add(draw_text(lux, "pixel-ratio: " + window.devicePixelRatio, 0 , -20));
 
 for (let i = 0; i < 100; i++) {
     for (let k = 0; k < 100; k++) {
