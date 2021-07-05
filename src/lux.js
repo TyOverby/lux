@@ -113,7 +113,6 @@ export default class Lux {
         let dh = this._prev_viewport.height - this._viewport.height;
         if(Math.abs(dw) > 0.0001 || Math.abs(dh) > 0.0001) {
             this.mark_totally_dirty();
-            console.log("totally dirty!");
             return;
         } 
 
@@ -144,13 +143,13 @@ export default class Lux {
         this.ctx.putImageData(imageData, x, y);
         */
 
-        let prev_composite = this.ctx.globalCompositeOperation;
-        this.ctx.globalCompositeOperation = "copy";
+        //let prev_composite = this.ctx.globalCompositeOperation;
+        //this.ctx.globalCompositeOperation = "copy";
         this.ctx.imageSmoothingEnabled = false;
         //this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
         this.ctx.drawImage(this.canvas, x, y);
         //console.log({x, y});
-        this.ctx.globalCompositeOperation = prev_composite;
+        //this.ctx.globalCompositeOperation = prev_composite;
     }
 
     draw() {
