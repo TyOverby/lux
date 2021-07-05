@@ -6,13 +6,15 @@ export default class Lux {
         this.scene = new Scene();
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d', { alpha: false });
+
+        this.ctx.imageSmoothingEnabled = false;
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
         this._renderer = renderer;
         this._width = 100;
         this._height = 100;
         this._prev_viewport = new Bbox(0,0,0,0);
         this._viewport = new Bbox(0, 0, 100, 100);
-        this._totally_dirty = false;
         this._dirty_boxes = [];
         this.ctx.textBaseline = 'bottom';
 
@@ -23,6 +25,9 @@ export default class Lux {
         this._dirty_boxes.push(this._viewport);
     }
 
+    get renderer() {
+        return this._renderer;
+    }
     set renderer(f) {
         this._renderer = f;
         this.mark_totally_dirty();
@@ -43,6 +48,14 @@ export default class Lux {
         this.canvas.height = Math.floor(height * scale);
     }
 
+    get width() {
+        return this._width;
+    }
+
+    get height() {
+        return this._height;
+    }
+
     set width(width) {
         this.set_size(width, this._height)
     }
@@ -52,6 +65,10 @@ export default class Lux {
     }
 
 
+    get viewport() {
+        return this._viewport;
+    }
+
     set viewport(next) {
         if (next.eq(this._viewport)) {
             return;
@@ -60,19 +77,12 @@ export default class Lux {
         if (this._prev_viewport === null) {
             this._prev_viewport = this._viewport;            
         }
-
         this._viewport = next;
-    }
-
-    get viewport() {
-        return this._viewport;
     }
 
     addBulk(items) {
         this.scene.addAll(items);
-        for (let item of items) {
-            this._dirty_boxes.push(item);
-        }
+        this._dirty_boxes = this._dirty_boxes.concat(items);
     }
 
     add(bbox) {
@@ -109,6 +119,7 @@ export default class Lux {
         if (this._prev_viewport === this._viewport || this._prev_viewport.eq(this._viewport)) {
             return;
         }
+
         let dw = this._prev_viewport.width - this._viewport.width; 
         let dh = this._prev_viewport.height - this._viewport.height;
         if(Math.abs(dw) > 0.0001 || Math.abs(dh) > 0.0001) {
@@ -135,21 +146,21 @@ export default class Lux {
         dx *= xrat;
         dy *= yrat;
 
-        let x = -Math.round(window.devicePixelRatio * dx);
-        let y = -Math.round(window.devicePixelRatio * dy);
+        let x = Math.round(window.devicePixelRatio * dx);
+        let y = Math.round(window.devicePixelRatio * dy);
 
-        /*
-        let imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.putImageData(imageData, x, y);
-        */
+        this.ctx.drawImage(this.canvas, -x, -y);
+    }
 
-        //let prev_composite = this.ctx.globalCompositeOperation;
-        //this.ctx.globalCompositeOperation = "copy";
-        this.ctx.imageSmoothingEnabled = false;
-        //this.ctx.drawImage(this.canvas, -Math.round(2 * dx), -Math.round(2 * dy));
-        this.ctx.drawImage(this.canvas, x, y);
-        //console.log({x, y});
-        //this.ctx.globalCompositeOperation = prev_composite;
+    fetch_dirty() {
+        let original_length = this._dirty_boxes.length;
+        let len = Math.min(original_length, Math.max(100, (Math.floor (Math.sqrt(1 + original_length)))));
+        if (len != 0) {
+            //console.log({original_length, len});
+        }
+        let first = this._dirty_boxes.slice(0, len);
+        this._dirty_boxes = this._dirty_boxes.slice(len, original_length);
+        return first;
     }
 
     draw() {
@@ -160,9 +171,10 @@ export default class Lux {
         this.apply_transform();
         this.ctx.textBaseline = 'top';
 
+        let dirty_boxes = this.fetch_dirty();
 
         this.ctx.beginPath();
-        for (var bbox of this._dirty_boxes) {
+        for (var bbox of dirty_boxes) {
             bbox = bbox.expand(1);
             this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
         }
@@ -173,7 +185,7 @@ export default class Lux {
         this.ctx.fillStyle="black";
 
         this.ctx.beginPath();
-        for (var bbox of this._dirty_boxes) {
+        for (var bbox of dirty_boxes) {
             bbox = bbox.expand(1);
             this.ctx.rect (bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
         }
@@ -181,7 +193,7 @@ export default class Lux {
         
         var seen = new Set();
         let to_draw = [];
-        for (var bbox of this._dirty_boxes) {
+        for (var bbox of dirty_boxes) {
             bbox = bbox.expand(1);
             var a = this.scene.intersecting(bbox);
             var l = a.length;
@@ -194,19 +206,15 @@ export default class Lux {
             }
         }
 
-        var drawn = 0;
         this.ctx.save ();
         to_draw.sort((a, b) => a.idx - b.idx);
         for (var o of to_draw) {
             this._renderer(o);
-            drawn ++;
         }
         this.ctx.restore();
 
         this.ctx.restore();
-        this._dirty_boxes = [] 
         this.ctx.resetTransform();
         this._prev_viewport = this.viewport;
-        this._totally_dirty = false;
     }
 }

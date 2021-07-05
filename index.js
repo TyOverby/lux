@@ -195,16 +195,17 @@ lux.canvas.addEventListener('wheel', function (event) {
         scale = 1 / 0.9;
     }
     let new_width = lux.viewport.width * scale; 
-    let new_height = lux.viewport.width * scale; 
+    let new_height = lux.viewport.height * scale; 
     let delta_w = lux.viewport.width - new_width;
     let delta_h = lux.viewport.height - new_height;
     let new_x = lux.viewport.minX + delta_w / 2;
     let new_y = lux.viewport.minY + delta_h / 2;
 
+    new_height = (lux.height / lux.width) * new_width; 
+
     lux.viewport = new Bbox(new_x, new_y, 0, 0);
     lux.viewport.width = new_width;
     lux.viewport.height = new_height;
-    console.log(scale);
 });
 
 
