@@ -5,7 +5,7 @@ export default class Lux {
     constructor(canvas, renderer) {
         this.scene = new Scene();
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        this.ctx = canvas.getContext('2d', { alpha: false });
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this._renderer = renderer;
         this._width = 100;
@@ -162,10 +162,16 @@ export default class Lux {
         this.ctx.textBaseline = 'top';
 
 
+        this.ctx.beginPath();
         for (var bbox of this._dirty_boxes) {
             bbox = bbox.expand(1);
-            this.ctx.clearRect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
+            this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
         }
+        this.ctx.closePath();
+        this.ctx.fillStyle="white";
+        this.ctx.fill();
+
+        this.ctx.fillStyle="black";
 
         this.ctx.beginPath();
         for (var bbox of this._dirty_boxes) {
