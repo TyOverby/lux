@@ -2,8 +2,24 @@ import Lux from "./src/lux.js"
 import Bbox from "./src/bbox.js"
 import current_sha from "./scripts/current_sha.js";
 
-function renderer({text, x, y}) {
-    lux.ctx.fillText(text, x, y);
+function renderer(object) {
+    if (object.kind  === "text") {
+        let {text, x, y} =  object;
+        lux.ctx.fillText(text, x, y);
+    } else if (object.kind  === "graph") { 
+        lux.ctx.beginPath();
+        let is_first = true;
+        for (let {x,y} of object.points) {
+            if (is_first) {
+                lux.ctx.moveTo(x, y);
+                is_first = false;
+            } else {
+                lux.ctx.lineTo(x, y);
+            }
+        }
+        lux.ctx.strokeStyle = object.color;
+        lux.ctx.stroke();
+    }
 }
 
 let lux = new Lux(document.querySelector("#canvas"), renderer);
@@ -11,6 +27,8 @@ window.lux = lux;
 lux.width = 500;
 lux.height = 500;
 lux.viewport = new Bbox(0, 0, 100, 100);
+
+var object_idx = 0;
 
 var text_cache = {};
 function draw_text(lux, text, x, y) {
@@ -29,7 +47,28 @@ function draw_text(lux, text, x, y) {
     box.text = text;
     box.x = x;
     box.y = y;
+    box.kind = "text";
+    box.idx = object_idx++;
     return box
+}
+
+function draw_graph(lux, color, points) {
+    let min_x = Infinity;
+    let min_y = Infinity;
+    let max_x = -Infinity;
+    let max_y = -Infinity;
+    for (let {x, y} of points) {
+        min_x = Math.min(min_x, x);
+        max_x = Math.max(max_x, x);
+        min_y = Math.min(min_y, y);
+        max_y = Math.max(max_y, y);
+    }
+    let box = new Bbox(min_x, min_y, max_x, max_y);
+    box.kind="graph";
+    box.points = points;
+    box.color = color;
+    box.idx = object_idx++;
+    return box;
 }
 
 var items = [];
@@ -38,6 +77,18 @@ var to_add_and_remove = []
 
 lux.add(draw_text(lux, current_sha, 0 , -30));
 lux.add(draw_text(lux, "pixel-ratio: " + window.devicePixelRatio, 0 , -20));
+
+for (var k = 0; k < 10; k ++) {
+    let points = []
+    for (var i = 0; i < 1000; i ++) {
+        let y = Math.sin(((i + k) / 200) * 3.14) * 100;
+        points.push({x:i, y});
+        if (i % 20 == 0) {
+            lux.add(draw_graph(lux, `hsl(${(k / 10)*360}, 100%, 50%)`, points));
+            points = [{x:i, y}];
+        }
+    }
+}
 
 for (let i = 0; i < 100; i++) {
     for (let k = 0; k < 100; k++) {

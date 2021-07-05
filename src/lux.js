@@ -180,18 +180,24 @@ export default class Lux {
         }
         this.ctx.clip();
         
-        var to_draw = new Set();
+        var seen = new Set();
+        let to_draw = [];
         for (var bbox of this._dirty_boxes) {
             bbox = bbox.expand(1);
             var a = this.scene.intersecting(bbox);
             var l = a.length;
             for (var i = 0; i < l; i ++) {
-                to_draw.add(a[i]);
+                let element = a[i];
+                if (!seen.has(element)) {
+                    seen.add(element)
+                    to_draw.push(a[i]);
+                }
             }
         }
 
         var drawn = 0;
         this.ctx.save ();
+        to_draw.sort((a, b) => a.idx - b.idx);
         for (var o of to_draw) {
             this._renderer(o);
             drawn ++;
