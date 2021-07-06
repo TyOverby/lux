@@ -78,14 +78,16 @@ var to_add_and_remove = []
 lux.add(draw_text(lux, current_sha, 0 , -30));
 lux.add(draw_text(lux, "pixel-ratio: " + window.devicePixelRatio, 0 , -20));
 
-for (var k = 0; k < 10; k ++) {
-    let points = []
-    for (var i = 0; i < 1000; i ++) {
-        let y = Math.sin(((i + k) / 200) * 3.14) * 100;
-        points.push({x:i, y});
-        if (i % 20 == 0) {
-            lux.add(draw_graph(lux, `hsl(${(k / 10)*360}, 100%, 50%)`, points));
-            points = [{x:i, y}];
+for (let o = 0; o < 10; o++) {
+    for (var k = 0; k < 10; k ++) {
+        let points = []
+        for (var i = 0; i < 1000; i ++) {
+            let y = Math.sin(((i + o * 10 + k) / 200) * 3.14) * 100;
+            points.push({x:i, y});
+            if (i % 20 == 0) {
+                lux.add(draw_graph(lux, `hsl(${(k / 10)*360}, 100%, 50%)`, points));
+                points = [{x:i, y}];
+            }
         }
     }
 }

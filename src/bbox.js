@@ -31,9 +31,37 @@ export default class Bbox {
         return this.maxY - this.minY;
     }
 
+    midpoint() {
+       let half_x = (this.minX + this.maxX) / 2;
+       let half_y = (this.minY + this.maxY) / 2;
+       return [half_x, half_y];
+    }
+
+   quads() {
+       let [half_x, half_y] = this.midpoint()
+
+       return [
+           new Bbox(this.minX,this.minY, half_x, half_y),
+           new Bbox(half_x,this.minY, this.maxX, half_y),
+           new Bbox(this.minX,half_y, half_x, this.maxY),
+           new Bbox(half_x,half_y, this.maxX, this.maxY)
+       ]
+   }
+
+   divide(n) {
+       let working = [this];
+       for (var i = 0; i < n; i ++) {
+          working = working.flatMap(x => x.quads());
+       }
+
+       return working;
+   }
+
+
    expand(by) {
     return new Bbox(this.minX-by, this.minY-by, this.maxX + by, this.maxY + by);
    }
+
 
    intersects(other) {
         var a = other.minX > this.maxX;
