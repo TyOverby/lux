@@ -16,6 +16,7 @@ export default class Lux {
         this._height = 100;
         this._prev_viewport = new Bbox(0,0,0,0);
         this._viewport = new Bbox(0, 0, 100, 100);
+        this.prev_viewport = new Bbox(0, 0, 100, 100);
         this._dirty_tree = new RBush();
         this._dirty_priority = [];
         this._dirty_low_priority = [];
@@ -239,12 +240,17 @@ export default class Lux {
         let to_draw = [];
         let dirty_boxes = [];
 
-
-        let process = bbox => {
-            dirty_boxes.push(bbox);
+        let process = (bbox, overflow) => {
             bbox = bbox.expand(1);
             var a = this.scene.intersecting(bbox);
             var l = a.length;
+
+            if (overflow && l + to_draw.length > 500) {
+                overflow(bbox);
+                return;
+            }
+
+            dirty_boxes.push(bbox);
 
             /*
             if ( to_draw.length + l > 500) {
@@ -262,10 +268,22 @@ export default class Lux {
                 }
             }
         }
-        for (let bbox of this._dirty_priority) {
-            process(bbox);
+        while (to_draw.length < 500 && this._dirty_priority.length > 0) {
+            process(this._dirty_priority.shift());
         }
-        this._dirty_priority = [];
+        let from_priority = to_draw.length;
+
+        if (true) {
+            this.ctx.beginPath();
+            for (var bbox of this._dirty_priority) {
+                bbox = bbox.expand(1);
+                //console.log(bbox);
+                this.ctx.rect(bbox.minX, bbox.minY, bbox.width, bbox.height);
+            }
+            this.ctx.closePath();
+            this.ctx.fillStyle="white";
+            this.ctx.fill();
+        }
 
         let all_dirty = this._dirty_tree.all();
         this._dirty_tree.clear();
@@ -275,10 +293,16 @@ export default class Lux {
                 break;
             }
         }
+        let from_main_queue = to_draw.length - from_priority;
 
         while (to_draw.length < 500 && this._dirty_low_priority.length > 0) {
-            process(this._dirty_low_priority.pop());
+            process(this._dirty_low_priority.pop(), bbox =>  {
+                for (let bb of bbox.quads()) {
+                    this.add_dirty(bb);
+                }
+            });
         }
+        let from_low_queue = to_draw.length - from_main_queue - from_priority;
 
         this._dirty_tree.load(all_dirty);
 
@@ -319,7 +343,7 @@ export default class Lux {
             this._renderer(o);
             drawn ++;
         }
-        console.log("drawn: "+drawn);
+        console.log(`drawn: ${to_draw.length}, high: ${from_priority}, main: ${from_main_queue}, low: ${from_low_queue}`);
         this.ctx.restore();
 
         this.ctx.restore();

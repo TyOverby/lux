@@ -5,6 +5,10 @@ import current_sha from "./scripts/current_sha.js";
 function renderer(object) {
     if (object.kind  === "text") {
         let {text, x, y} =  object;
+        if (object.color) {
+            lux.ctx.fillStyle=object.color;
+        }
+        lux.ctx.font = object.font;
         lux.ctx.fillText(text, x, y);
     } else if (object.kind  === "graph") { 
         lux.ctx.beginPath();
@@ -31,14 +35,15 @@ lux.viewport = new Bbox(0, 0, 100, 100);
 var object_idx = 0;
 
 var text_cache = {};
-function draw_text(lux, text, x, y) {
+function draw_text(lux, text, x, y, color, font) {
     let measured;
-    let found = (text_cache[text]);
+    let found = (text_cache[font + text]);
     if (found) {
         measured=found;
     } else {
+        lux.ctx.font = font;
         measured = lux.ctx.measureText(text);
-        text_cache[text] = measured;
+        text_cache[font + text] = measured;
     }
 
     let w = measured.width;
@@ -49,6 +54,8 @@ function draw_text(lux, text, x, y) {
     box.y = y;
     box.kind = "text";
     box.idx = object_idx++;
+    box.color=color;
+    box.font=font;
     return box
 }
 
@@ -94,8 +101,10 @@ for (let o = 0; o < 10; o++) {
 
 for (let i = 0; i < 100; i++) {
     for (let k = 0; k < 100; k++) {
-        let hello = draw_text(lux, "hello", 30 * k, 20 * i);
-        let world = draw_text(lux, "world", 30 * k, 20 * i + 2);
+        let color = () => `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`
+        let font = () => `${10 + (Math.floor(Math.random() * 5 - 3))}pt ${Math.random() > 0.5 ? "sans-serif" : "serif"}`;
+        let hello = draw_text(lux, "hello", 30 * k, 20 * i, color(), font());
+        let world = draw_text(lux, "world", 30 * k, 20 * i + 2, color(), font());
 
         if (i % 10 == 0) {
             to_add_and_remove.push(hello);
