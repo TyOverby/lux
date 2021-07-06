@@ -75,7 +75,7 @@ var items = [];
 
 var to_add_and_remove = []
 
-lux.add(draw_text(lux, current_sha, 0 , -30));
+lux.add(draw_text(lux, "hash: " + current_sha, 0 , -30));
 lux.add(draw_text(lux, "pixel-ratio: " + window.devicePixelRatio, 0 , -20));
 
 for (let o = 0; o < 10; o++) {
