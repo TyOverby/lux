@@ -101,13 +101,14 @@ for (let o = 0; o < 10; o++) {
 
 for (let i = 0; i < 100; i++) {
     for (let k = 0; k < 100; k++) {
-        let color = () => `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`
+        let color = () => `rgba(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255}, ${(Math.random())})`
         let font = () => `${10 + (Math.floor(Math.random() * 5 - 3))}pt ${Math.random() > 0.5 ? "sans-serif" : "serif"}`;
         let hello = draw_text(lux, "hello", 30 * k, 20 * i, color(), font());
         let world = draw_text(lux, "world", 30 * k, 20 * i + 2, color(), font());
 
-        if (i % 10 == 0) {
+        if (Math.random() < 0.1) {
             to_add_and_remove.push(hello);
+            to_add_and_remove.push(world);
         }
 
         lux.add(hello);
