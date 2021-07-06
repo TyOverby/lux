@@ -37,6 +37,11 @@ export default class Lux {
 
             this._dirty_tree.insert(bbox);
         } else if (priority) {
+            for (var f of this._dirty_priority) {
+                if (f.eq(bbox)) {
+                    return;
+                }
+            }
             this._dirty_priority.push(bbox);
         } else {
             this._dirty_low_priority.push(bbox);
@@ -44,7 +49,13 @@ export default class Lux {
     }
 
     mark_totally_dirty () {
-        this._dirty_low_priority = this._viewport.divide(2);
+        if (this._viewport.intersects(this.scene.tree.data)) {
+            let intersection = this._viewport.intersection(this.scene.tree.data);
+            console.log(intersection);
+            this._dirty_low_priority = intersection.divide(2);
+        } else {
+            this._dirty_low_priority = this._viewport.divide(2);
+        }
     }
 
     get renderer() {
@@ -228,19 +239,25 @@ export default class Lux {
         let to_draw = [];
         let dirty_boxes = [];
 
-        let all_dirty = this._dirty_tree.all();
-        all_dirty.sort((a, b) => this.distance_to_center(a) - this.distance_to_center(b));
-        this._dirty_tree.clear();
 
         let process = bbox => {
             dirty_boxes.push(bbox);
             bbox = bbox.expand(1);
             var a = this.scene.intersecting(bbox);
             var l = a.length;
+
+            /*
+            if ( to_draw.length + l > 500) {
+                for (let b of bbox.divide(1)) {
+                    this.add_dirty(b);
+                }
+                return;
+            }*/
+
             for (var i = 0; i < l; i ++) {
                 let element = a[i];
                 if (!seen.has(element)) {
-                    seen.add(element)
+                    seen.add(element);
                     to_draw.push(a[i]);
                 }
             }
@@ -249,17 +266,21 @@ export default class Lux {
             process(bbox);
         }
         this._dirty_priority = [];
-        while (all_dirty.length !== 0) { 
+
+        let all_dirty = this._dirty_tree.all();
+        this._dirty_tree.clear();
+        while (all_dirty.length !== 0 && to_draw.length < 500) { 
             process(all_dirty.pop())
             if (to_draw.length > 500) {
                 break;
             }
         }
-        this._dirty_tree.load(all_dirty);
 
         while (to_draw.length < 500 && this._dirty_low_priority.length > 0) {
             process(this._dirty_low_priority.pop());
         }
+
+        this._dirty_tree.load(all_dirty);
 
         /*
         this.ctx.beginPath();

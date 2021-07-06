@@ -31,6 +31,18 @@ export default class Bbox {
         return this.maxY - this.minY;
     }
 
+    get area() {
+        return this.width * this.height;
+    }
+
+    union (other) {
+       return new Bbox(
+           Math.min(this.minX, other.minX),
+           Math.min(this.minY, other.minY),
+           Math.max(this.maxX, other.maxX),
+           Math.max(this.maxY, other.maxY))
+    }
+
     midpoint() {
        let half_x = (this.minX + this.maxX) / 2;
        let half_y = (this.minY + this.maxY) / 2;
@@ -62,6 +74,13 @@ export default class Bbox {
     return new Bbox(this.minX-by, this.minY-by, this.maxX + by, this.maxY + by);
    }
 
+   intersection(other) {
+       return new Bbox(
+           Math.max(this.minX, other.minX),
+           Math.max(this.minY, other.minY),
+           Math.min(this.maxX, other.maxX),
+           Math.min(this.maxY, other.maxY))
+   }
 
    intersects(other) {
         var a = other.minX > this.maxX;
