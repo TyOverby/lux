@@ -14,7 +14,7 @@ export default class Lux {
         this._renderer = renderer;
         this._width = 100;
         this._height = 100;
-        this._prev_viewport = new Bbox(0,0,0,0);
+        this._prev_viewport = new Bbox(0, 0, 0, 0);
         this._viewport = new Bbox(0, 0, 100, 100);
         this.prev_viewport = new Bbox(0, 0, 100, 100);
         this._dirty_tree = new RBush();
@@ -26,7 +26,7 @@ export default class Lux {
     }
 
     add_dirty(bbox, priority) {
-        if(!this._viewport.intersects(bbox)) {
+        if (!this._viewport.intersects(bbox)) {
             return
         }
 
@@ -49,7 +49,7 @@ export default class Lux {
         }
     }
 
-    mark_totally_dirty () {
+    mark_totally_dirty() {
         if (this._viewport.intersects(this.scene.tree.data)) {
             let intersection = this._viewport.intersection(this.scene.tree.data);
             console.log(intersection);
@@ -109,7 +109,7 @@ export default class Lux {
         }
 
         if (this._prev_viewport === null) {
-            this._prev_viewport = this._viewport;            
+            this._prev_viewport = this._viewport;
         }
         this._viewport = next;
     }
@@ -134,7 +134,7 @@ export default class Lux {
     rats() {
         let xrat = this._width / this.viewport.width;
         let yrat = this._height / this.viewport.height;
-        return {xrat, yrat}
+        return { xrat, yrat }
     }
 
     apply_transform() {
@@ -188,13 +188,13 @@ export default class Lux {
         this.ctx.fill();
         */
 
-        let {xrat, yrat} = this.rats();
+        let { xrat, yrat } = this.rats();
         let dx = d_min_x * xrat;
         let dy = d_min_y * yrat;
 
         let x = Math.round(window.devicePixelRatio * dx);
         let y = Math.round(window.devicePixelRatio * dy);
-        
+
         let wf = this._prev_viewport.width / this._viewport.width;
         let hf = this._prev_viewport.height / this._viewport.height;
 
@@ -209,7 +209,7 @@ export default class Lux {
 
     fetch_dirty() {
         let original_length = this._dirty_boxes.length;
-        let len = Math.min(original_length, Math.max(100, (Math.floor (Math.sqrt(1 + original_length)))));
+        let len = Math.min(original_length, Math.max(100, (Math.floor(Math.sqrt(1 + original_length)))));
         if (len != 0) {
             //console.log({original_length, len});
         }
@@ -223,8 +223,24 @@ export default class Lux {
         let [cx, cy] = this._viewport.midpoint();
         let dx = px - cx;
         let dy = py - cy;
-        Math.sqrt(dx * dx + dy * dy);
+        return Math.sqrt(dx * dx + dy * dy);
     }
+
+    lerp(v0, v1, t) {
+        return (1 - t) * v0 + t * v1;
+    }
+
+    in_pixel_coords(x, y) {
+        return [this.lerp(0,this.width, (x / this.viewport.width)),
+         this.lerp(0,this.height, (y / this.viewport.height))]
+    }
+   
+    to_screen_rect(r) {
+        let [minX,minY] = this.in_pixel_coords(r.minX, r.minY);
+        let [maxX,maxY] = this.in_pixel_coords(r.maxX, r.maxY);
+        return Bbox(minX, minY, maxX, maxY);
+    }
+
 
     draw() {
         this.scene.flush();
@@ -260,7 +276,7 @@ export default class Lux {
                 return;
             }*/
 
-            for (var i = 0; i < l; i ++) {
+            for (var i = 0; i < l; i++) {
                 let element = a[i];
                 if (!seen.has(element)) {
                     seen.add(element);
@@ -281,13 +297,13 @@ export default class Lux {
                 this.ctx.rect(bbox.minX, bbox.minY, bbox.width, bbox.height);
             }
             this.ctx.closePath();
-            this.ctx.fillStyle="white";
+            this.ctx.fillStyle = "white";
             this.ctx.fill();
         }
 
         let all_dirty = this._dirty_tree.all();
         this._dirty_tree.clear();
-        while (all_dirty.length !== 0 && to_draw.length < 500) { 
+        while (all_dirty.length !== 0 && to_draw.length < 500) {
             process(all_dirty.pop())
             if (to_draw.length > 500) {
                 break;
@@ -296,7 +312,7 @@ export default class Lux {
         let from_main_queue = to_draw.length - from_priority;
 
         while (to_draw.length < 500 && this._dirty_low_priority.length > 0) {
-            process(this._dirty_low_priority.pop(), bbox =>  {
+            process(this._dirty_low_priority.pop(), bbox => {
                 for (let bb of bbox.quads()) {
                     this.add_dirty(bb);
                 }
@@ -323,25 +339,25 @@ export default class Lux {
             this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
         }
         this.ctx.closePath();
-        this.ctx.fillStyle="white";
+        this.ctx.fillStyle = "white";
         this.ctx.fill();
 
-        this.ctx.fillStyle="black";
+        this.ctx.fillStyle = "black";
 
         this.ctx.beginPath();
         for (var bbox of dirty_boxes) {
             bbox = bbox.expand(1);
-            this.ctx.rect (bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
+            this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
         }
         this.ctx.clip();
-        
 
-        this.ctx.save ();
+
+        this.ctx.save();
         to_draw.sort((a, b) => a.idx - b.idx);
         var drawn = 0;
         for (var o of to_draw) {
             this._renderer(o);
-            drawn ++;
+            drawn++;
         }
         console.log(`drawn: ${to_draw.length}, high: ${from_priority}, main: ${from_main_queue}, low: ${from_low_queue}`);
         this.ctx.restore();
