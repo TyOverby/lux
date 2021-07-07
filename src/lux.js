@@ -289,10 +289,14 @@ export default class Lux {
         }
         let from_priority = to_draw.length;
 
-        if (false) {
+        if (true) {
             this.ctx.beginPath();
             for (var bbox of this._dirty_priority) {
-                bbox = bbox.expand(1);
+            bbox = new Bbox
+                ((Math.floor(((bbox.minX - this.viewport.minX) / this.viewport.width) * this.width * devicePixelRatio)),
+                    (Math.floor(((bbox.minY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)),
+                    (Math.ceil(((bbox.maxX - this.viewport.minX) / this.viewport.width) * this.width * devicePixelRatio)),
+                    (Math.ceil(((bbox.maxY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)))
                 //console.log(bbox);
                 this.ctx.rect(bbox.minX, bbox.minY, bbox.width, bbox.height);
             }
