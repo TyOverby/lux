@@ -139,8 +139,7 @@ export default class Lux {
 
     apply_transform() {
         this.ctx.resetTransform();
-        let xrat = this._width / this.viewport.width;
-        let yrat = this._height / this.viewport.height;
+        let { xrat, yrat } = this.rats();
 
         this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         this.ctx.scale(xrat, yrat);
@@ -231,13 +230,13 @@ export default class Lux {
     }
 
     in_pixel_coords(x, y) {
-        return [this.lerp(0,this.width, (x / this.viewport.width)),
-         this.lerp(0,this.height, (y / this.viewport.height))]
+        return [this.lerp(0, this.width, (x / this.viewport.width)),
+        this.lerp(0, this.height, (y / this.viewport.height))]
     }
-   
+
     to_screen_rect(r) {
-        let [minX,minY] = this.in_pixel_coords(r.minX, r.minY);
-        let [maxX,maxY] = this.in_pixel_coords(r.maxX, r.maxY);
+        let [minX, minY] = this.in_pixel_coords(r.minX, r.minY);
+        let [maxX, maxY] = this.in_pixel_coords(r.maxX, r.maxY);
         return Bbox(minX, minY, maxX, maxY);
     }
 
@@ -256,6 +255,9 @@ export default class Lux {
         let dirty_boxes = [];
 
         let process = (bbox, overflow) => {
+            let {xrat,yrat} = this.rats();
+            let expand = Math.max(1/xrat, 1/yrat)
+            bbox = bbox.expand(expand);
             var a = this.scene.intersecting(bbox);
             var l = a.length;
 
@@ -287,7 +289,7 @@ export default class Lux {
         }
         let from_priority = to_draw.length;
 
-        if (true) {
+        if (false) {
             this.ctx.beginPath();
             for (var bbox of this._dirty_priority) {
                 bbox = bbox.expand(1);
@@ -330,24 +332,22 @@ export default class Lux {
         this.ctx.fill();
         */
 
-        this.apply_transform();
         this.ctx.beginPath();
         for (var bbox of dirty_boxes) {
-            this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
+            bbox = new Bbox
+                ((Math.floor(((bbox.minX - this.viewport.minX) / this.viewport.width) * this.width * devicePixelRatio)),
+                    (Math.floor(((bbox.minY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)),
+                    (Math.ceil(((bbox.maxX - this.viewport.minX) / this.viewport.width) * this.width * devicePixelRatio)),
+                    (Math.ceil(((bbox.maxY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)))
+            this.ctx.rect(bbox.minX, bbox.minY, bbox.width, bbox.height);
         }
         this.ctx.closePath();
         this.ctx.fillStyle = "white";
         this.ctx.fill();
-
+        this.ctx.clip();
         this.ctx.fillStyle = "black";
 
-        this.ctx.beginPath();
-        for (var bbox of dirty_boxes) {
-            this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
-        }
-        this.ctx.clip();
-
-
+        this.apply_transform();
         this.ctx.save();
         to_draw.sort((a, b) => a.idx - b.idx);
         var drawn = 0;
