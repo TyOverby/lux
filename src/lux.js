@@ -247,7 +247,6 @@ export default class Lux {
         this.draw_translated();
 
         this.ctx.save();
-        this.apply_transform();
         this.ctx.textBaseline = 'top';
 
         //let dirty_boxes = this.fetch_dirty();
@@ -257,7 +256,6 @@ export default class Lux {
         let dirty_boxes = [];
 
         let process = (bbox, overflow) => {
-            bbox = bbox.expand(1);
             var a = this.scene.intersecting(bbox);
             var l = a.length;
 
@@ -319,7 +317,6 @@ export default class Lux {
             });
         }
         let from_low_queue = to_draw.length - from_main_queue - from_priority;
-
         this._dirty_tree.load(all_dirty);
 
         /*
@@ -333,9 +330,9 @@ export default class Lux {
         this.ctx.fill();
         */
 
+        this.apply_transform();
         this.ctx.beginPath();
         for (var bbox of dirty_boxes) {
-            bbox = bbox.expand(1);
             this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
         }
         this.ctx.closePath();
@@ -346,7 +343,6 @@ export default class Lux {
 
         this.ctx.beginPath();
         for (var bbox of dirty_boxes) {
-            bbox = bbox.expand(1);
             this.ctx.rect(bbox.minX, bbox.minY, bbox.maxX - bbox.minX, bbox.maxY - bbox.minY);
         }
         this.ctx.clip();
