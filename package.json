@@ -1,0 +1,21 @@
+{
+  "name": "lux",
+  "version": "1.0.0",
+  "description": "ES62ES5",
+  "author": "JarunWang",
+  "scripts": {
+    "build": "rollup src/lux.js > dist/lux.js && babel dist/lux.js -o dist/out.es5.js"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.5.2",
+    "babel-polyfill": "^6.5.0",
+    "babel-preset-es2015": "^6.5.0",
+    "rollup": "*"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  }
+}
