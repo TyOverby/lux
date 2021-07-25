@@ -11,7 +11,6 @@ function renderer(object) {
         lux.ctx.font = object.font;
         lux.ctx.fillText(text, x, y);
     } else if (object.kind  === "graph") { 
-        //lux.ctx.lineCap="sqaure";
         lux.ctx.beginPath();
         let is_first = true;
         for (let {x,y} of object.points) {

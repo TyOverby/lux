@@ -5,6 +5,8 @@ git add -A
 git commit -m '_'
 git rev-parse --short HEAD > "$SCRIPT_DIR/current_sha.txt"
 echo "export default \"$(cat $SCRIPT_DIR/current_sha.txt)\"" > "$SCRIPT_DIR/current_sha.js"
+npm run build
+npm run min
 git add -A
 git commit -m '_'
 git push origin main
