@@ -4,7 +4,8 @@
   "description": "ES62ES5",
   "author": "JarunWang",
   "scripts": {
-    "build": "rollup src/lux.js > dist/lux.js && babel dist/lux.js -o dist/out.es5.js"
+    "build": "rollup --format=iife -n Lux src/lux.js > dist/lux.js && babel dist/lux.js -o dist/lux.es5.js",
+    "min":   "rollup --format=iife -n Lux src/lux.js > dist/lux.js && babel --minified dist/lux.js -o dist/lux.es5.min.js"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
