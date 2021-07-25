@@ -11,6 +11,7 @@ function renderer(object) {
         lux.ctx.font = object.font;
         lux.ctx.fillText(text, x, y);
     } else if (object.kind  === "graph") { 
+        lux.ctx.lineCap="sqaure";
         lux.ctx.beginPath();
         let is_first = true;
         for (let {x,y} of object.points) {
@@ -65,10 +66,10 @@ function draw_graph(lux, color, points) {
     let max_x = -Infinity;
     let max_y = -Infinity;
     for (let {x, y} of points) {
-        min_x = Math.min(min_x, x);
-        max_x = Math.max(max_x, x);
-        min_y = Math.min(min_y, y);
-        max_y = Math.max(max_y, y);
+        min_x = Math.min(min_x, x) - 0.5;
+        max_x = Math.max(max_x, x) + 0.5;
+        min_y = Math.min(min_y, y) - 0.5;
+        max_y = Math.max(max_y, y) + 0.5;
     }
     let box = new Bbox(min_x, min_y, max_x, max_y);
     box.kind="graph";

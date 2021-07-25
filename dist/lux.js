@@ -1039,9 +1039,9 @@ var Lux = (function () {
             for (var bbox of dirty_boxes) {
                 bbox = new Bbox
                     ((Math.floor(((bbox.minX - this.viewport.minX) / this.viewport.width) * this.width * devicePixelRatio)),
-                        (Math.floor(((bbox.minY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)),
-                        (Math.ceil(((bbox.maxX - this.viewport.minX) / this.viewport.width) * this.width * devicePixelRatio)),
-                        (Math.ceil(((bbox.maxY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)));
+                     (Math.floor(((bbox.minY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)),
+                     (Math.ceil(((bbox.maxX - this.viewport.minX) / this.viewport.width) * this.width * devicePixelRatio)),
+                     (Math.ceil(((bbox.maxY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)));
                 this.ctx.rect(bbox.minX, bbox.minY, bbox.width, bbox.height);
             }
             this.ctx.closePath();
