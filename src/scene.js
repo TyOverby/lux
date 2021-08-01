@@ -18,6 +18,7 @@ export default class Scene {
     }
 
     addBulk(items) {
+       this.flush();
        this.tree.load(items);
     }
 
@@ -27,6 +28,7 @@ export default class Scene {
     }
 
     intersecting(bbox) {
+        this.flush();
         return this.tree.search(bbox);
     }
 }
