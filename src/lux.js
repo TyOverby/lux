@@ -356,7 +356,7 @@ export default class Lux {
         to_draw.sort((a, b) => a.idx - b.idx);
         var drawn = 0;
         for (var o of to_draw) {
-            this._renderer(o);
+            this._renderer(o, this.ctx);
             drawn++;
         }
         console.log(`drawn: ${to_draw.length}, high: ${from_priority}, main: ${from_main_queue}, low: ${from_low_queue}`);
