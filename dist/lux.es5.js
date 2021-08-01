@@ -663,19 +663,20 @@ var Lux = function () {
     }();
 
     var Bbox = function () {
-        function Bbox(minX, minY, maxX, maxY) {
+        function Bbox(minX, minY, maxX, maxY, value) {
             _classCallCheck(this, Bbox);
 
             this.minX = minX;
             this.minY = minY;
             this.maxX = maxX;
             this.maxY = maxY;
+            this.value = value || null;
         }
 
         _createClass(Bbox, [{
             key: 'clone',
             value: function clone() {
-                return new Bbox(this.minX, this.minY, this.maxX, this.maxY);
+                return new Bbox(this.minX, this.minY, this.maxX, this.maxY, this.value);
             }
         }, {
             key: 'eq',

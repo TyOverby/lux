@@ -601,15 +601,16 @@ var Lux = (function () {
     }
 
     class Bbox {
-        constructor(minX, minY, maxX, maxY){
+        constructor(minX, minY, maxX, maxY, value){
             this.minX = minX;
             this.minY = minY;
             this.maxX = maxX;
             this.maxY = maxY;
+            this.value = value || null;
         }
 
         clone() {
-            return new Bbox(this.minX, this.minY, this.maxX, this.maxY);
+            return new Bbox(this.minX, this.minY, this.maxX, this.maxY, this.value);
         }
 
         eq(other) {
