@@ -585,6 +585,7 @@ var Lux = (function () {
         }
 
         addBulk(items) {
+           this.flush();
            this.tree.load(items);
         }
 
@@ -594,6 +595,7 @@ var Lux = (function () {
         }
 
         intersecting(bbox) {
+            this.flush();
             return this.tree.search(bbox);
         }
     }
