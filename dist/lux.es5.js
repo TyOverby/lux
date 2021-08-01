@@ -1329,6 +1329,7 @@ var Lux = function () {
     }();
 
     Lux.Bbox = Bbox;
+    window.Lux = Lux;
 
     return Lux;
 }();
