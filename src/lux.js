@@ -343,7 +343,7 @@ export default class Lux {
                  (Math.floor(((bbox.minY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)),
                  (Math.ceil(((bbox.maxX - this.viewport.minX) / this.viewport.width) * this.width * devicePixelRatio)),
                  (Math.ceil(((bbox.maxY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)))
-            this.ctx.rect(bbox.minX, bbox.minY, bbox.width, bbox.height);
+            this.ctx.rect(bbox.minX - 0.5, bbox.minY-0.5, bbox.width+1.0, bbox.height + 1.0);
         }
         this.ctx.closePath();
         this.ctx.fillStyle = "white";
@@ -367,3 +367,5 @@ export default class Lux {
         this._prev_viewport = this.viewport;
     }
 }
+
+Lux.Bbox = Bbox
