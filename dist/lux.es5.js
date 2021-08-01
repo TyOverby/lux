@@ -1221,7 +1221,7 @@ var Lux = function () {
                         var bbox = _step6.value;
 
                         bbox = new Bbox(Math.floor((bbox.minX - this.viewport.minX) / this.viewport.width * this.width * devicePixelRatio), Math.floor((bbox.minY - this.viewport.minY) / this.viewport.height * this.height * devicePixelRatio), Math.ceil((bbox.maxX - this.viewport.minX) / this.viewport.width * this.width * devicePixelRatio), Math.ceil((bbox.maxY - this.viewport.minY) / this.viewport.height * this.height * devicePixelRatio));
-                        this.ctx.rect(bbox.minX, bbox.minY, bbox.width, bbox.height);
+                        this.ctx.rect(bbox.minX - 0.5, bbox.minY - 0.5, bbox.width + 1.0, bbox.height + 1.0);
                     }
                 } catch (err) {
                     _didIteratorError6 = true;
@@ -1257,7 +1257,7 @@ var Lux = function () {
                     for (var _iterator7 = to_draw[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
                         var o = _step7.value;
 
-                        this._renderer(o);
+                        this._renderer(o, this.ctx);
                     }
                 } catch (err) {
                     _didIteratorError7 = true;
@@ -1325,6 +1325,8 @@ var Lux = function () {
 
         return Lux;
     }();
+
+    Lux.Bbox = Bbox;
 
     return Lux;
 }();

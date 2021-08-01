@@ -1042,7 +1042,7 @@ var Lux = (function () {
                      (Math.floor(((bbox.minY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)),
                      (Math.ceil(((bbox.maxX - this.viewport.minX) / this.viewport.width) * this.width * devicePixelRatio)),
                      (Math.ceil(((bbox.maxY - this.viewport.minY) / this.viewport.height) * this.height * devicePixelRatio)));
-                this.ctx.rect(bbox.minX, bbox.minY, bbox.width, bbox.height);
+                this.ctx.rect(bbox.minX - 0.5, bbox.minY-0.5, bbox.width+1.0, bbox.height + 1.0);
             }
             this.ctx.closePath();
             this.ctx.fillStyle = "white";
@@ -1054,7 +1054,7 @@ var Lux = (function () {
             this.ctx.save();
             to_draw.sort((a, b) => a.idx - b.idx);
             for (var o of to_draw) {
-                this._renderer(o);
+                this._renderer(o, this.ctx);
             }
             console.log(`drawn: ${to_draw.length}, high: ${from_priority}, main: ${from_main_queue}, low: ${from_low_queue}`);
             this.ctx.restore();
@@ -1064,6 +1064,8 @@ var Lux = (function () {
             this._prev_viewport = this.viewport;
         }
     }
+
+    Lux.Bbox = Bbox;
 
     return Lux;
 
