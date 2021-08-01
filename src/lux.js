@@ -368,4 +368,5 @@ export default class Lux {
     }
 }
 
-Lux.Bbox = Bbox
+Lux.Bbox = Bbox;
+window.Lux = Lux;
